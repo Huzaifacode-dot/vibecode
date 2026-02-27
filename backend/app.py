@@ -19,10 +19,10 @@ app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 CORS(app)
 
 # Configuration
-app.config['SECRET_KEY'] = 'your_secret_key_here_for_jwt' # In prod, read from env
-basedir = os.path.abspath(os.path.dirname(__name__))
-# Try connecting to MySQL. Change root:password if your Workbench has different credentials
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@127.0.0.1:3306/campusconnect'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key_here_for_jwt')
+basedir = os.path.abspath(os.path.dirname(__file__))
+# Use DATABASE_URL env var (for Render/production) or fall back to local SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'campusconnect.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
