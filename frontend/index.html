@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="light-mode">
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar hidden" id="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-network-wired"></i> <span class="logo-text">CampusConnect</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" onclick="navigate('dashboard')" id="nav-dashboard"><i class="fas fa-home"></i>
+                    <span>Dashboard</span></a>
+                <a href="#" onclick="navigate('profile')" id="nav-profile"><i class="fas fa-user-circle"></i>
+                    <span>Profile</span></a>
+                <a href="#" onclick="navigate('feed')" id="nav-feed"><i class="fas fa-stream"></i> <span>Social
+                        Feed</span></a>
+                <a href="#" onclick="navigate('events')" id="nav-events"><i class="fas fa-calendar-alt"></i>
+                    <span>Events</span></a>
+                <a href="#" onclick="navigate('chat')" id="nav-chat"><i class="fas fa-comment-dots"></i>
+                    <span>Messages</span></a>
+                <a href="#" onclick="navigate('skill_gap')" id="nav-skill_gap"><i class="fas fa-robot"></i> <span>Skill
+                        Gap Analyzer</span></a>
+                <a href="#" onclick="navigate('attendance')" id="nav-attendance"><i class="fas fa-clipboard-list"></i>
+                    <span>Attendance</span></a>
+                <a href="#" onclick="navigate('admin')" id="nav-admin" class="hidden"><i class="fas fa-shield-alt"></i>
+                    <span>Admin Panel</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="topbar hidden" id="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search students, skills..." id="global-search"
+                            onkeyup="handleGlobalSearch(event)">
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+
+                    <div class="notification-wrapper">
+                        <button class="icon-btn" onclick="toggleDropdown('notification-dropdown')">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge-dot" id="notif-badge"></span>
+                        </button>
+                        <div class="dropdown-menu hidden" id="notification-dropdown">
+                            <h4>Notifications</h4>
+                            <div class="dropdown-item">Welcome to CampusConnect!</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-wrapper">
+                        <button class="profile-btn" onclick="toggleDropdown('profile-dropdown')">
+                            <img src="https://via.placeholder.com/40" alt="Avatar" id="nav-avatar" class="avatar-small">
+                            <span id="nav-username">User</span>
+                            <i class="fas fa-chevron-down text-sm"
+                                style="color: var(--text-muted); font-size:0.8rem;"></i>
+                        </button>
+                        <div class="dropdown-menu hidden" id="profile-dropdown">
+                            <a href="#" onclick="navigate('profile')" class="dropdown-item"><i
+                                    class="fas fa-user text-primary"></i> My Profile</a>
+                            <a href="#" onclick="logout()" class="dropdown-item" style="color: var(--danger);"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views container -->
+            <div id="app" class="view-container">
+                <!-- Javascript will inject login/signup or dashboard views here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+        function toggleDropdown(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+        // Basic click outside to close dropdowns
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-wrapper') && !event.target.closest('.notification-wrapper')) {
+                const dropdowns = document.querySelectorAll('.dropdown-menu');
+                dropdowns.forEach(d => {
+                    if (!d.classList.contains('hidden')) d.classList.add('hidden');
+                });
+            }
+        }
+        function handleGlobalSearch(e) {
+            if (e.key === 'Enter') {
+                alert('Search query: ' + e.target.value + ' (Integration pending within Chat/Recs)');
+            }
+        }
+    </script>
+</body>
+
+</html>
