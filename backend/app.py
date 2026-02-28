@@ -19,13 +19,22 @@ app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 CORS(app)
 
 # Configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key_here_for_jwt')
-basedir = os.path.abspath(os.path.dirname(__file__))
-# Use DATABASE_URL env var (for Render/production) or fall back to local MySQL
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:password@127.0.0.1:3306/campusconnect')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ================= DATABASE CONFIG (RAILWAY SAFE) =================
 
-db.init_app(app)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_secret_key')
+
+db_url = os.environ.get("DATABASE_URL")
+
+if db_url:
+    # Railway gives postgres:// but SQLAlchemy needs postgresql://
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+else:
+    # Local fallback (SQLite so no MySQL error)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///local.db"
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Create tables
 with app.app_context():
