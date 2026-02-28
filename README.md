@@ -23,6 +23,9 @@ Since the frontend is a Vanilla JavaScript application using the Fetch API with 
 ## Demo Flow to Impress Judges
 1. **Login**: Use the `Demo Student` quick-login button (`student1@college.edu` / `password123`).
 2. **Dashboard**: Show the AI Recommendations section. Notice the Match % based on skill vectors.
+
+![Student Dashboard](images/student_dashboard.png)
+
 3. **Events**: Navigate to Events, create a new Hackathon event, and click to join existing ones.
 4. **Chat**: Show the messaging module allowing seamless communication with peers.
 5. **Admin & Anomaly Detection**:
