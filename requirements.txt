@@ -1,11 +1,10 @@
 flask
 flask-cors
-sqlalchemy
-pymysql
-psycopg2-binary
+flask-sqlalchemy
+PyJWT
 pandas
 scikit-learn
-gunicorn
 python-dotenv
-PyJWT
 werkzeug
+gunicorn
+psycopg2-binary
