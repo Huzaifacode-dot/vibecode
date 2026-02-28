@@ -20,7 +20,7 @@ Since the frontend is a Vanilla JavaScript application using the Fetch API with 
 1. Navigate to the `frontend/` directory.
 2. Double click the `index.html` file to open it in Chrome/Edge/Firefox.
 
-## Demo Flow to Impress Judges
+## Demo Flow 
 1. **Login**: Use the `Demo Student` quick-login button (`student1@college.edu` / `password123`).
 2. **Dashboard**: Show the AI Recommendations section. Notice the Match % based on skill vectors.
 
