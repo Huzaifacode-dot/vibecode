@@ -57,8 +57,13 @@ def seed_database():
         # Create a few fake profiles (High activity or 0 skills)
         fake1 = User(name="Bot User X", email="botx@spam.com", password_hash=generate_password_hash("123"), branch="Unknown", year="Unknown", bio="Click my link!")
         fake2 = User(name="Spam Bot Y", email="boty@spam.com", password_hash=generate_password_hash("123"), branch="Unknown", year="Unknown", bio="Buy crypto!")
+        
+        # Create an admin profile
+        admin = User(name="System Administrator", email="admin@university.edu", password_hash=generate_password_hash("adminpassword"), branch="Staff", year="N/A", bio="Platform Admin", is_admin=True)
+        
         db.session.add(fake1)
         db.session.add(fake2)
+        db.session.add(admin)
         db.session.commit()
         
         # Add to the active array for other seeds

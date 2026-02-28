@@ -21,8 +21,8 @@ CORS(app)
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key_here_for_jwt')
 basedir = os.path.abspath(os.path.dirname(__file__))
-# Use DATABASE_URL env var (for Render/production) or fall back to local SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'campusconnect.db'))
+# Use DATABASE_URL env var (for Render/production) or fall back to local MySQL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+pymysql://root:password@127.0.0.1:3306/campusconnect')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -58,6 +58,33 @@ def token_required(f):
         
         return f(current_user, *args, **kwargs)
     return decorated
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split(" ")[1] if " " in request.headers['Authorization'] else request.headers['Authorization']
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        try:
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            current_user = User.query.filter_by(id=data['user_id']).first()
+        except:
+            return jsonify({'message': 'Token is invalid!'}), 401
+        
+        if not current_user or not current_user.is_admin:
+            return jsonify({'message': 'Admin privileges required!'}), 403
+            
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+def log_admin_action(admin_id, action, target_id=None):
+    from models import AdminAuditLog
+    log = AdminAuditLog(admin_id=admin_id, action=action, target_id=target_id)
+    db.session.add(log)
+    db.session.commit()
+
 
 # --- 1. USER AUTHENTICATION & PROFILE ---
 
@@ -102,6 +129,9 @@ def login():
 
     if not user or not check_password_hash(user.password_hash, password):
         return jsonify({"message": "Invalid email or password"}), 401
+        
+    if getattr(user, 'is_suspended', False):
+        return jsonify({"message": "Your account has been suspended by an administrator."}), 403
 
     token = jwt.encode({
         'user_id': user.id,
@@ -201,6 +231,21 @@ def create_event(current_user):
 def get_events():
     events = Event.query.all()
     return jsonify({"events": [e.to_dict() for e in events]}), 200
+
+@app.route('/api/admin/event/<int:event_id>', methods=['DELETE'])
+@admin_required
+def delete_event_admin(current_user, event_id):
+    event = Event.query.get(event_id)
+    if not event:
+        return jsonify({"message": "Event not found"}), 404
+        
+    title = event.title
+    db.session.delete(event)
+    db.session.commit()
+    
+    log_admin_action(current_user.id, f"Deleted event: {title}", target_id=None)
+    
+    return jsonify({"message": "Event removed successfully"}), 200
 
 @app.route('/api/join_event', methods=['POST'])
 @token_required
@@ -318,10 +363,99 @@ def run_fake_detection(current_user):
     return jsonify({"message": f"Detection complete. {suspicious_count} accounts flagged."}), 200
 
 @app.route('/api/admin/users', methods=['GET'])
-@token_required
+@admin_required
 def get_all_users(current_user):
     users = User.query.all()
     return jsonify({"users": [u.to_dict() for u in users]}), 200
+
+@app.route('/api/admin/suspend/<int:user_id>', methods=['POST'])
+@admin_required
+def toggle_suspend_user(current_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+         return jsonify({"message": "User not found"}), 404
+    
+    # Toggle suspension
+    new_status = not getattr(user, 'is_suspended', False)
+    user.is_suspended = new_status
+    db.session.commit()
+    
+    action = f"Suspended account" if new_status else f"Unsuspended account"
+    log_admin_action(current_user.id, action, target_id=user.id)
+    
+    return jsonify({"message": f"User {user.name} suspension status set to {new_status}"}), 200
+
+@app.route('/api/admin/user/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(current_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+         return jsonify({"message": "User not found"}), 404
+         
+    if user.is_admin and user.id == current_user.id:
+         return jsonify({"message": "Cannot delete yourself"}), 400
+         
+    name = user.name
+    db.session.delete(user)
+    db.session.commit()
+    
+    log_admin_action(current_user.id, f"Deleted user account: {name}", target_id=user_id)
+    
+    return jsonify({"message": "User deleted successfully"}), 200
+
+@app.route('/api/admin/stats', methods=['GET'])
+@admin_required
+def get_admin_stats(current_user):
+    total_users = User.query.count()
+    active_users_today = User.query.count() # Mocked for MVP
+    total_events = Event.query.count()
+    total_messages = Message.query.count()
+    fake_accounts = User.query.filter_by(is_suspicious=True).count()
+    
+    return jsonify({
+        "stats": {
+            "total_users": total_users,
+            "active_users_today": active_users_today,
+            "total_events": total_events,
+            "total_messages": total_messages,
+            "fake_accounts": fake_accounts
+        }
+    }), 200
+
+@app.route('/api/admin/send_warning', methods=['POST'])
+@admin_required
+def send_admin_warning(current_user):
+    data = request.get_json()
+    user_id = data.get('user_id')
+    message = data.get('message', 'Warning from Administrator')
+    
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+        
+    warning_msg = Message(sender_id=current_user.id, receiver_id=user_id, content=f"[ADMIN WARNING]: {message}")
+    db.session.add(warning_msg)
+    db.session.commit()
+    
+    log_admin_action(current_user.id, "Sent warning message", target_id=user_id)
+    
+    return jsonify({"message": "Warning sent"}), 200
+
+@app.route('/api/admin/reset_password/<int:user_id>', methods=['POST'])
+@admin_required
+def reset_user_password(current_user, user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+        
+    # Reset to default
+    default_pw = "password123"
+    user.password_hash = generate_password_hash(default_pw)
+    db.session.commit()
+    
+    log_admin_action(current_user.id, "Reset password", target_id=user_id)
+    
+    return jsonify({"message": f"Password for {user.name} reset to: {default_pw}"}), 200
 
 # --- 5. Messaging System ---
 @app.route('/api/chat', methods=['POST'])
@@ -470,6 +604,35 @@ def get_attendance_summary(current_user, user_id):
         })
         
     return jsonify({"attendance": summary}), 200
+
+@app.route('/api/admin/low_attendance', methods=['GET'])
+@admin_required
+def get_low_attendance(current_user):
+    users = User.query.all()
+    low_attendance_data = []
+    
+    for u in users:
+        if u.is_admin: continue
+            
+        records = AttendanceRecord.query.filter_by(user_id=u.id).all()
+        if not records: continue
+            
+        total_classes_all_subjects = sum([r.subject.total_classes for r in records])
+        total_attended = sum([r.classes_attended for r in records])
+        
+        if total_classes_all_subjects == 0: continue
+            
+        overall_perc = (total_attended / total_classes_all_subjects) * 100
+        
+        if overall_perc < 75:
+            low_attendance_data.append({
+                "user_id": u.id,
+                "name": u.name,
+                "overall_attendance": round(overall_perc, 2),
+                "status": "Low Attendance" if overall_perc < 65 else "Risk"
+            })
+            
+    return jsonify({"low_attendance": low_attendance_data}), 200
 
 @app.route('/api/mark_attendance', methods=['POST'])
 @token_required

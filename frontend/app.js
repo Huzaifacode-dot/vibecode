@@ -38,6 +38,11 @@ function toggleTheme() {
 
 function initApp() {
     if (currentToken && currentUser) {
+        if (currentUser.is_admin) {
+            window.location.href = 'admin.html';
+            return;
+        }
+
         document.getElementById('sidebar').classList.remove('hidden');
         document.getElementById('topbar').classList.remove('hidden');
 
@@ -47,9 +52,6 @@ function initApp() {
             document.getElementById('nav-avatar').src = `http://127.0.0.1:5000${currentUser.profile_photo}`;
         }
 
-        if (currentUser.is_admin) {
-            document.getElementById('nav-admin').classList.remove('hidden');
-        }
         navigate('dashboard');
     } else {
         document.getElementById('sidebar').classList.add('hidden');
@@ -105,8 +107,7 @@ function navigate(view) {
             break;
         case 'admin':
             if (currentUser.is_admin) {
-                app.innerHTML = renderAdmin();
-                fetchAdminData();
+                window.location.href = 'admin.html';
             } else {
                 navigate('dashboard');
             }
@@ -655,43 +656,6 @@ function renderAttendance() {
             <span><i class="fas fa-circle" style="color: var(--secondary)"></i> Safe (>75%)</span>
             <span><i class="fas fa-circle" style="color: var(--warning)"></i> At Risk</span>
             <span><i class="fas fa-circle" style="color: var(--danger)"></i> Low Attendance (<75%)</span>
-        </div>
-    </div>
-    `;
-}
-
-function renderAdmin() {
-    return `
-    <div class="container">
-        <h1 class="mb-2"><i class="fas fa-shield-alt text-danger"></i> Admin Dashboard</h1>
-        
-        <div class="card mb-2" style="background: #fef2f2; border-left: 4px solid var(--danger);">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:1rem;">
-                <div>
-                    <h3 class="text-danger">Fake Profile Detection</h3>
-                    <p style="font-size: 0.9rem; color: #7f1d1d;">Runs Isolation Forest (Anomaly Detection) to flag suspicious accounts based on missing skills and high event creation activity.</p>
-                </div>
-                <button class="btn" style="background: var(--danger);" onclick="runDetection()">Run ML Scan</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 class="mb-1">All Users</h3>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; text-align: left; border-collapse: collapse;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <th style="padding: 1rem 0;">ID</th>
-                            <th>Name</th>
-                            <th>Activity</th>
-                            <th>ML Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-users-table">
-                        <tr><td colspan="4">Loading...</td></tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
     `;
@@ -1446,40 +1410,4 @@ async function predictAttendanceRisk() {
         // Fallback if admin has not triggered training yet
         showToast('Error: AI model may need to be trained by Admin first!', 'error');
     }
-}
-
-async function runDetection() {
-    try {
-        showToast('Running ML AI model...', 'success');
-        const res = await apiCall('/admin/run_fake_detection', 'POST');
-        showToast(res.message, 'success');
-        fetchAdminData();
-    } catch (e) { console.error(e); }
-}
-
-async function fetchAdminData() {
-    try {
-        const data = await apiCall('/admin/users');
-        const tbody = document.getElementById('admin-users-table');
-
-        tbody.innerHTML = data.users.map(u => `
-            <tr style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 1rem 0;">${u.id}</td>
-                <td>
-                    <strong>${u.name}</strong><br>
-                    <span style="font-size:0.8rem; color:var(--text-muted)">${u.skills.length} skills • ${u.interests.length} interests</span>
-                </td>
-                <td>${u.email}</td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
-                        <span style="font-weight: bold; color: ${u.trust_score >= 80 ? 'var(--secondary)' : (u.trust_score >= 40 ? 'var(--warning)' : 'var(--danger)')}">Score: ${u.trust_score}</span>
-                    </div>
-                    ${u.is_suspicious ?
-                '<span class="badge" style="background:rgba(239, 68, 68, 0.2); color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Suspicious Account Alert</span>' :
-                '<span class="badge text-muted" style="background:transparent; border: 1px solid var(--border); color:var(--secondary)"><i class="fas fa-check"></i> Clean</span>'
-            }
-                </td>
-            </tr>
-        `).join('');
-    } catch (e) { console.error(e); }
 }

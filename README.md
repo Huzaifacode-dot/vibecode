@@ -26,9 +26,11 @@ Since the frontend is a Vanilla JavaScript application using the Fetch API with 
 3. **Events**: Navigate to Events, create a new Hackathon event, and click to join existing ones.
 4. **Chat**: Show the messaging module allowing seamless communication with peers.
 5. **Admin & Anomaly Detection**:
-   - Logout and click `Demo Admin` (`admin@college.edu` / `admin123`).
-   - Navigate to the **Admin** tab.
-   - Click **Run ML Scan** to trigger the Isolation Forest model.
-   - See how the anomalous "Bot" accounts are flagged with a "Suspicious Account Alert" badge!
+   - Login using the System Administrator credentials (`admin@university.edu` / `adminpassword`).
+   - You will be redirected to the **Admin Control Center**.
+   - Navigate to **Fake Profile Detection** and click **Execute System Scan** to trigger the Isolation Forest model.
+   - View active trends in the **Platform Analytics** tab.
+
+![Admin Control Center](images/admin_control_center.png)
 
 *Built with Flask, Vanilla JS, and Scikit-Learn.*

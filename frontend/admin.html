@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center | CampusConnect</title>
+    <link rel="stylesheet" href="admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-shield-alt text-danger"></i> <span class="logo-text">Control Center</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" onclick="navigateAdmin('dashboard')" id="nav-dashboard" class="active"><i
+                        class="fas fa-chart-pie"></i> <span>Platform Analytics</span></a>
+                <a href="#" onclick="navigateAdmin('users')" id="nav-users"><i class="fas fa-users"></i> <span>User
+                        Management</span></a>
+                <a href="#" onclick="navigateAdmin('fake')" id="nav-fake"><i class="fas fa-user-secret"></i> <span>Fake
+                        Profile Detection</span></a>
+                <a href="#" onclick="navigateAdmin('attendance')" id="nav-attendance"><i class="fas fa-user-clock"></i>
+                    <span>Attendance Monitoring</span></a>
+                <a href="#" onclick="navigateAdmin('events')" id="nav-events"><i class="fas fa-calendar-alt"></i>
+                    <span>Event Management</span></a>
+                <div style="flex: 1;"></div>
+                <a href="index.html" style="color: var(--primary);"><i class="fas fa-arrow-left"></i> <span>Back to
+                        App</span></a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h2 style="margin:0; font-weight:600;"><span id="top-title">Platform Analytics</span><span
+                            class="badge"
+                            style="margin-left: 10px; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.5);">ADMINISTRATOR</span>
+                    </h2>
+                </div>
+                <div class="topbar-right">
+                    <div class="profile-wrapper">
+                        <button class="profile-btn" onclick="toggleDropdown('profile-dropdown')">
+                            <span id="nav-username">Admin</span>
+                            <i class="fas fa-chevron-down text-sm"
+                                style="color: var(--text-muted); font-size:0.8rem;"></i>
+                        </button>
+                        <div class="dropdown-menu hidden" id="profile-dropdown">
+                            <a href="#" onclick="logout()" class="dropdown-item" style="color: var(--danger);"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views container -->
+            <div id="admin-app" class="view-container container">
+                <!-- Javascript will inject views here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="admin.js"></script>
+    <script>
+        function toggleDropdown(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+        window.onclick = function (event) {
+            if (!event.target.closest('.profile-wrapper') && !event.target.closest('.notification-wrapper')) {
+                const dropdowns = document.querySelectorAll('.dropdown-menu');
+                dropdowns.forEach(d => {
+                    if (!d.classList.contains('hidden')) d.classList.add('hidden');
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

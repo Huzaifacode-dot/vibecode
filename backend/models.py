@@ -45,6 +45,7 @@ class User(db.Model):
     bio = db.Column(db.Text)
     is_admin = db.Column(db.Boolean, default=False)
     is_suspicious = db.Column(db.Boolean, default=False)
+    is_suspended = db.Column(db.Boolean, default=False)
     trust_score = db.Column(db.Integer, default=50)
     profile_photo = db.Column(db.String(255), nullable=True)
     
@@ -70,7 +71,27 @@ class User(db.Model):
             "trust_score": self.trust_score,
             "profile_photo": self.profile_photo,
             "skills": [s.skill_name for s in self.skills],
-            "interests": [i.interest_name for i in self.interests]
+            "interests": [i.interest_name for i in self.interests],
+            "is_suspended": self.is_suspended
+        }
+
+class AdminAuditLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    action = db.Column(db.String(255), nullable=False)
+    target_id = db.Column(db.Integer, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    admin = db.relationship('User', foreign_keys=[admin_id], backref='admin_logs', lazy=True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "admin_id": self.admin_id,
+            "admin_name": self.admin.name if self.admin else "Unknown",
+            "action": self.action,
+            "target_id": self.target_id,
+            "timestamp": self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
         }
 
 class Skill(db.Model):
