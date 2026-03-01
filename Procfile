@@ -1,1 +1,1 @@
-web: cd backend && gunicorn -b 0.0.0.0:$PORT app:app
+web: cd backend && gunicorn app:app -b 0.0.0.0:${PORT:-8080}
