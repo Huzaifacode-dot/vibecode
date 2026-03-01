@@ -726,8 +726,8 @@ async function handlePhotoUpload(e) {
 
         currentUser.profile_photo = data.profile_photo_url;
         localStorage.setItem('user', JSON.stringify(currentUser));
-        document.getElementById('profile-avatar-img').src = ' + window.location.origin + ' + data.profile_photo_url;
-        document.getElementById('nav-avatar').src = ' + window.location.origin + ' + data.profile_photo_url;
+        document.getElementById('profile-avatar-img').src = window.location.origin + data.profile_photo_url;
+        document.getElementById('nav-avatar').src = window.location.origin + data.profile_photo_url;
         showToast('Profile photo updated!', 'success');
     } catch (err) {
         showToast(err.message, 'error');
