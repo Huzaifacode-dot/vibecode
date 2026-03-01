@@ -13,6 +13,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.linear_model import LogisticRegression
 
+
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
 app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 # Enable CORS for all routes so frontend can connect easily
@@ -36,7 +37,8 @@ else:
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Create tables
+db.init_app(app)
+
 with app.app_context():
     db.create_all()
 
