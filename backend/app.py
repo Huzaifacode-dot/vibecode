@@ -1,4 +1,5 @@
 import os
+import requests
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import jwt
@@ -124,6 +125,23 @@ def signup():
     )
     db.session.add(new_user)
     db.session.commit()
+
+    # Optional: Send data to Sheety (Google Sheets integration)
+    sheety_url = os.environ.get('SHEETY_URL')
+    if sheety_url:
+        try:
+            # Sheety expects a root key matching singular sheet name (e.g. "user")
+            sheety_data = {
+                "user": {
+                    "name": name,
+                    "email": email,
+                    "branch": branch,
+                    "year": year
+                }
+            }
+            requests.post(sheety_url, json=sheety_data)
+        except Exception as e:
+            print("Sheety Warning:", e)
 
     return jsonify({"message": "User registered successfully"}), 201
 
