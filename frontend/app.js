@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:5000/api';
+const API_URL = window.location.origin + '/api';
 
 // --- State Management ---
 let currentUser = JSON.parse(localStorage.getItem('user')) || null;
@@ -363,7 +363,7 @@ function renderProfile() {
             <div style="padding: 1.5rem; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: -60px;">
                 <!-- Avatar -->
                 <div style="position: relative; margin-bottom: 1rem;">
-                    <img id="profile-avatar-img" src="${currentUser.profile_photo ? 'http://127.0.0.1:5000' + currentUser.profile_photo : 'https://via.placeholder.com/100'}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--card-bg); background: var(--card-bg); object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <img id="profile-avatar-img" src="${currentUser.profile_photo ? '${window.location.origin}' + currentUser.profile_photo : 'https://via.placeholder.com/100'}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--card-bg); background: var(--card-bg); object-fit: cover; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
                     <label style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--card-bg); transition: transform 0.2s;">
                         <i class="fas fa-camera" style="font-size: 0.8rem;"></i>
                         <input type="file" id="upload-photo-input" accept="image/png, image/jpeg" style="display: none;" onchange="handlePhotoUpload(event)">
@@ -476,7 +476,7 @@ function renderFeed() {
         <!-- Create Post Card -->
         <div class="card mb-2" style="background: var(--card-bg); padding: 1.5rem;">
             <div style="display: flex; gap: 1rem; align-items: flex-start;">
-                <img src="${(currentUser && currentUser.profile_photo) ? 'http://127.0.0.1:5000' + currentUser.profile_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
+                <img src="${(currentUser && currentUser.profile_photo) ? '${window.location.origin}' + currentUser.profile_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
                 <form id="create-post-form" style="flex:1; display:flex; flex-direction:column; gap:0.5rem;" onsubmit="handleCreatePost(event)">
                     <textarea id="post-content" rows="3" placeholder="What's on your mind? Start a discussion..." style="width: 100%; border: none; background: transparent; resize: none; color: var(--text-main); outline: none;" required></textarea>
                     <hr style="border: 0; border-top: 1px solid var(--border); margin: 0.5rem 0;">
@@ -726,8 +726,8 @@ async function handlePhotoUpload(e) {
 
         currentUser.profile_photo = data.profile_photo_url;
         localStorage.setItem('user', JSON.stringify(currentUser));
-        document.getElementById('profile-avatar-img').src = 'http://127.0.0.1:5000' + data.profile_photo_url;
-        document.getElementById('nav-avatar').src = 'http://127.0.0.1:5000' + data.profile_photo_url;
+        document.getElementById('profile-avatar-img').src = '${window.location.origin}' + data.profile_photo_url;
+        document.getElementById('nav-avatar').src = '${window.location.origin}' + data.profile_photo_url;
         showToast('Profile photo updated!', 'success');
     } catch (err) {
         showToast(err.message, 'error');
@@ -827,7 +827,7 @@ async function fetchRecommendations() {
 
         container.innerHTML = data.recommendations.map(user => `
             <div class="card" style="padding: 1.5rem; background: var(--card-bg); border-left: 4px solid var(--secondary); display: flex; flex-direction: column; gap: 0.5rem; align-items: center; text-align: center;">
-                <img src="${user.profile_photo ? 'http://127.0.0.1:5000' + user.profile_photo : 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary);">
+                <img src="${user.profile_photo ? '${window.location.origin}' + user.profile_photo : 'https://via.placeholder.com/60'}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary);">
                 
                 <div style="width: 100%;">
                     <div style="display:flex; justify-content:space-between; align-items: center; width: 100%;">
@@ -865,7 +865,7 @@ function renderPublicProfile(u) {
             <div style="position: absolute; top:0; left:0; right:0; height: 80px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 16px 16px 0 0;"></div>
             
             <div style="position: relative; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem;">
-                <img src="${u.profile_photo ? 'http://127.0.0.1:5000' + u.profile_photo : 'https://via.placeholder.com/100'}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--card-bg); background: var(--card-bg); object-fit: cover;">
+                <img src="${u.profile_photo ? '${window.location.origin}' + u.profile_photo : 'https://via.placeholder.com/100'}" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--card-bg); background: var(--card-bg); object-fit: cover;">
                 <div style="display: flex; gap: 0.5rem;">
                     <button class="btn" style="padding: 0.5rem 1.5rem;" onclick="selectChatUser(${u.id}, '${u.name.replace(/'/g, "\\'")}', '${u.profile_photo || ''}'); navigate('chat');"><i class="fas fa-paper-plane"></i> Message</button>
                 </div>
@@ -993,7 +993,7 @@ function renderChatList(list) {
         <div style="padding: 1rem; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; gap: 1rem; align-items: center; transition: background 0.2s;" 
              onclick="selectChatUser(${c.other_user_id}, '${c.other_user_name.replace(/'/g, "\\'")}', '${c.other_user_photo || ''}')" class="hover-bg">
             <div style="position: relative;">
-                <img src="${c.other_user_photo ? 'http://127.0.0.1:5000' + c.other_user_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
+                <img src="${c.other_user_photo ? '${window.location.origin}' + c.other_user_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
                 ${c.is_unread ? '<span class="badge-dot" style="width:12px; height:12px; border: 2px solid white; right: 0;"></span>' : ''}
             </div>
             <div style="flex: 1; overflow: hidden;">
@@ -1021,7 +1021,7 @@ function selectChatUser(id, name, photoUrl) {
     // Update Header
     document.getElementById('chat-header').innerHTML = `
         <div style="display: flex; align-items: center; gap: 1rem;">
-            <img src="${photoUrl ? 'http://127.0.0.1:5000' + photoUrl : 'https://via.placeholder.com/40'}" class="avatar-small">
+            <img src="${photoUrl ? '${window.location.origin}' + photoUrl : 'https://via.placeholder.com/40'}" class="avatar-small">
             <h3 style="margin: 0; color: var(--text-main);">${name}</h3>
         </div>
     `;
@@ -1211,7 +1211,7 @@ async function fetchFeed() {
             <div class="card mb-2" style="padding: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
                     <div style="display: flex; gap: 1rem; align-items: center;">
-                        <img src="${post.author_photo ? 'http://127.0.0.1:5000' + post.author_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
+                        <img src="${post.author_photo ? '${window.location.origin}' + post.author_photo : 'https://via.placeholder.com/40'}" class="avatar-small">
                         <div>
                             <h4 style="margin: 0; color: var(--text-main);">${post.author_name}</h4>
                             <span style="font-size: 0.8rem; color: var(--text-muted);">${formatTimeAgo(post.created_at)}</span>
@@ -1221,7 +1221,7 @@ async function fetchFeed() {
                 
                 <p style="margin-bottom: 1rem; white-space: pre-wrap; color: var(--text-main);">${post.content}</p>
                 
-                ${post.image_url ? `<img src="http://127.0.0.1:5000${post.image_url}" style="max-width: 100%; border-radius: 8px; margin-bottom: 1rem;">` : ''}
+                ${post.image_url ? `<img src="${window.location.origin}${post.image_url}" style="max-width: 100%; border-radius: 8px; margin-bottom: 1rem;">` : ''}
                 
                 <div style="display: flex; gap: 1rem; border-top: 1px solid var(--border); padding-top: 0.8rem;">
                     <button class="icon-btn ${post.user_has_liked ? 'text-danger' : 'text-muted'}" style="color: ${post.user_has_liked ? 'var(--danger)' : 'var(--text-muted)'}; display:flex; align-items:center; gap:0.4rem;" onclick="likePost(${post.id})">
@@ -1240,7 +1240,7 @@ async function fetchFeed() {
                     <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
                         ${post.comments_data.map(c => `
                             <div style="display: flex; gap: 0.8rem;">
-                                <img src="${c.author_photo ? 'http://127.0.0.1:5000' + c.author_photo : 'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                                <img src="${c.author_photo ? '${window.location.origin}' + c.author_photo : 'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
                                 <div style="background: rgba(124, 58, 237, 0.05); padding: 0.6rem 0.8rem; border-radius: 8px; flex: 1;">
                                     <strong style="font-size: 0.85rem; color: var(--text-main);">${c.author_name}</strong>
                                     <p style="font-size: 0.85rem; margin: 0; color: var(--text-main);">${c.content}</p>
