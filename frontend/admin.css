@@ -422,3 +422,68 @@ tr:hover td {
 .toast.error {
     background: var(--danger);
 }
+
+/* Menu Toggle Button for Admin */
+.menu-toggle {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-main);
+    cursor: pointer;
+    margin-right: 1rem;
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .topbar {
+        padding: 1rem;
+    }
+
+    .profile-btn #nav-username {
+        display: none;
+    }
+
+    .topbar-left h2 {
+        display: flex;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+
+    .badge {
+        display: none;
+        /* Hide admin badge on mobile for space */
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+}

@@ -40,7 +40,8 @@
         <main class="main-content">
             <!-- Top Navbar -->
             <header class="topbar">
-                <div class="topbar-left">
+                <div class="topbar-left" style="display: flex; align-items: center;">
+                    <button class="menu-toggle" onclick="toggleAdminSidebar()"><i class="fas fa-bars"></i></button>
                     <h2 style="margin:0; font-weight:600;"><span id="top-title">Platform Analytics</span><span
                             class="badge"
                             style="margin-left: 10px; background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.5);">ADMINISTRATOR</span>
@@ -73,6 +74,19 @@
 
     <script src="admin.js"></script>
     <script>
+        function toggleAdminSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+
+        // Close sidebar on mobile when a navigation link is clicked
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('show');
+                }
+            });
+        });
+
         function toggleDropdown(id) {
             document.getElementById(id).classList.toggle('hidden');
         }
